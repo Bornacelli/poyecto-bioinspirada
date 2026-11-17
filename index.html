@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colonia de hormigas y feromonas</title>
+  <meta name="description" content="Simulación de una colonia de hormigas que busca comida y optimiza rutas con feromonas. Proyecto de Computación Bioinspirada.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="cabecera">
+  <h1>Colonia de hormigas y feromonas</h1>
+  <p>Un agente inspirado en las hormigas: cada una decide con una red neuronal pequeña y, entre todas, la colonia encuentra comida, acorta sus rutas y reacciona cuando el entorno cambia.</p>
+</header>
+
+<main class="app">
+
+  <!-- ===================== Columna principal ===================== -->
+  <section class="principal">
+
+    <div class="tarjeta barra">
+      <div class="grupo-botones" role="group" aria-label="Control de la simulación">
+        <button id="btnIniciar" class="btn primario" type="button">▶ Iniciar</button>
+        <button id="btnPausar" class="btn" type="button" disabled>⏸ Pausar</button>
+        <button id="btnReiniciar" class="btn" type="button">↺ Reiniciar</button>
+      </div>
+      <div class="grupo-botones escenarios" role="group" aria-label="Escenarios">
+        <button class="btn esc activo" type="button" data-esc="basico">Básico</button>
+        <button class="btn esc" type="button" data-esc="dosCaminos">Dos caminos</button>
+        <button class="btn esc" type="button" data-esc="obstaculo">Obstáculo</button>
+        <button class="btn esc" type="button" data-esc="comidaMovil">Comida que se mueve</button>
+        <button class="btn esc" type="button" data-esc="variasFuentes">Varias fuentes</button>
+      </div>
+      <p id="descEscenario" class="desc"></p>
+    </div>
+
+    <div class="tarjeta lienzo-wrap">
+      <canvas id="lienzo" width="800" height="500" aria-label="Simulación de la colonia"></canvas>
+      <div class="leyenda">
+        <span><i class="punto nido"></i> Nido</span>
+        <span><i class="punto comida"></i> Comida</span>
+        <span><i class="punto muro"></i> Obstáculo</span>
+        <span><i class="punto fer-hogar"></i> Feromona de hogar</span>
+        <span><i class="punto fer-comida"></i> Feromona de comida</span>
+      </div>
+      <div class="reloj">Tiempo simulado: <strong id="reloj">0:00</strong></div>
+    </div>
+
+    <div id="panelRed" class="tarjeta" hidden>
+      <h2>Mente de la hormiga seleccionada</h2>
+      <p id="textoRed" class="desc"></p>
+      <canvas id="lienzoRed" width="620" height="300" aria-label="Red neuronal de la hormiga seleccionada"></canvas>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Indicadores</h2>
+      <div class="indicadores">
+        <div class="ind"><span class="etq">Comida recolectada</span><strong id="indTotal">0</strong></div>
+        <div class="ind"><span class="etq">Comida por minuto simulado</span><strong id="indPorMin">0</strong></div>
+        <div class="ind"><span class="etq">Primera comida encontrada</span><strong id="indPrimera">—</strong></div>
+        <div class="ind"><span class="etq">Tiempo de recuperación</span><strong id="indRecup">—</strong><small id="indRecupDet">Aún no hay cambios</small></div>
+        <div class="ind"><span class="etq">Usan la ruta corta</span><strong id="indRuta">—</strong><small id="indRutaDet">Solo en "Dos caminos</small></div>
+        <div class="ind"><span class="etq">Hormigas buscando / cargando</span><strong id="indEstados">0 / 0</strong></div>
+      </div>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Comida recolectada por minuto</h2>
+      <canvas id="grafico" aria-label="Gráfico de comida recolectada por minuto"></canvas>
+      <ul id="listaEventos" class="eventos"></ul>
+      <button id="btnCsv" class="btn" type="button">⬇ Descargar resultados (CSV)</button>
+    </div>
+  </section>
+
+  <!-- ===================== Panel de controles ===================== -->
+  <aside class="tarjeta panel" aria-label="Controles">
+    <h2>Controles</h2>
+
+    <label class="campo">
+      <span>Número de hormigas: <strong id="vHormigas">100</strong></span>
+      <input id="sHormigas" type="range" min="10" max="300" step="5" value="100">
+    </label>
+
+    <label class="campo">
+      <span>Evaporación de feromona: <strong id="vEvap">0.30</strong> % por paso</span>
+      <input id="sEvap" type="range" min="0.05" max="2" step="0.05" value="0.3">
+    </label>
+
+    <label class="campo">
+      <span>Exploración: <strong id="vExpl">40</strong> %</span>
+      <input id="sExpl" type="range" min="0" max="100" step="5" value="40">
+    </label>
+
+    <label class="campo">
+      <span>Velocidad de simulación: <strong id="vVel">2</strong>×</span>
+      <input id="sVel" type="range" min="0.5" max="10" step="0.5" value="2">
+    </label>
+
+    <fieldset class="campo modos">
+      <legend>Al hacer clic en el mapa…</legend>
+      <label><input type="radio" name="modo" value="seleccionar" checked> Seleccionar hormiga</label>
+      <label><input type="radio" name="modo" value="comida"> Poner comida</label>
+      <label><input type="radio" name="modo" value="obstaculo"> Dibujar obstáculos</label>
+      <label><input type="radio" name="modo" value="borrar"> Borrar</label>
+    </fieldset>
+
+    <label class="casilla"><input id="chkFer" type="checkbox" checked> Mostrar feromonas</label>
+    <label class="casilla"><input id="chkRed" type="checkbox"> Ver la red neuronal de una hormiga</label>
+    <p class="nota">Para ver la red: activa la casilla y haz clic sobre una hormiga en modo "Seleccionar.</p>
+  </aside>
+</main>
+
+<!-- ===================== Explicación ===================== -->
+<section class="explicacion">
+  <h2>¿Cómo funciona?</h2>
+
+  <div class="columnas">
+    <article class="tarjeta">
+      <h3>Lo que hacen las hormigas reales</h3>
+      <p>Una hormiga que sale a buscar comida camina casi al azar. Cuando encuentra algo, vuelve al nido soltando un rastro químico, la feromona. Las que salen después huelen ese rastro y tienden a seguirlo, y cada una que lo recorre lo refuerza. La feromona se evapora, así que los caminos viejos o largos se borran solos y los cortos, que se recorren más veces en el mismo tiempo, quedan marcados. Ninguna hormiga manda: la colonia resuelve el problema con reglas simples que cada individuo repite.</p>
+    </article>
+    <article class="tarjeta">
+      <h3>Cómo se traduce a código</h3>
+      <ul>
+        <li>Hay dos mapas de feromona. El de hogar lo dejan las que buscan, para poder volver; el de comida lo dejan las que regresan cargadas.</li>
+        <li>En cada paso, cada celda pierde un porcentaje de su feromona y reparte un poco entre sus vecinas.</li>
+        <li>Cada hormiga mide la feromona a su izquierda, al frente y a su derecha, y lee el mapa que le toca según lo que esté haciendo.</li>
+        <li>Lo que deja baja con el tiempo desde que salió del nido o de la comida. Por eso el rastro es más fuerte cerca de su origen y marca una dirección.</li>
+        <li>Si el entorno cambia, el rastro viejo se evapora y la exploración al azar permite que aparezca uno nuevo.</li>
+      </ul>
+    </article>
+  </div>
+
+  <article class="tarjeta">
+    <h3>La mente de cada hormiga</h3>
+    <div class="diagrama" role="img" aria-label="Diagrama: cinco entradas pasan por una capa oculta de cuatro neuronas y producen una decisión entre tres acciones">
+      <div class="col">
+        <h4>Entradas (5)</h4>
+        <span class="nodo ent">Feromona izquierda</span>
+        <span class="nodo ent">Feromona centro</span>
+        <span class="nodo ent">Feromona derecha</span>
+        <span class="nodo ent">¿Lleva comida?</span>
+        <span class="nodo ent">Valor al azar</span>
+      </div>
+      <div class="flecha" aria-hidden="true">➜</div>
+      <div class="col">
+        <h4>Capa oculta (4 · tanh)</h4>
+        <span class="nodo oc">Rastro a la izquierda</span>
+        <span class="nodo oc">Rastro al centro</span>
+        <span class="nodo oc">Impulso al azar</span>
+        <span class="nodo oc">Rumbo decidido</span>
+      </div>
+      <div class="flecha" aria-hidden="true">➜</div>
+      <div class="col">
+        <h4>Salidas (3 · softmax)</h4>
+        <span class="nodo sal">Girar a la izquierda</span>
+        <span class="nodo sal">Seguir recto</span>
+        <span class="nodo sal">Girar a la derecha</span>
+      </div>
+      <div class="flecha" aria-hidden="true">➜</div>
+      <div class="col">
+        <h4>Decisión</h4>
+        <span class="nodo dec">Se elige una acción al azar según sus probabilidades</span>
+      </div>
+    </div>
+    <p>Los pesos son fijos y los elegí a mano; cada uno está explicado en <code>js/cerebro.js</code>. Más feromona a un lado empuja a la hormiga a girar hacia él, más feromona al frente la empuja a seguir recto, y el valor aleatorio le deja explorar. El deslizador de exploración sube ese azar y hace menos predecible la elección.</p>
+  </article>
+
+  <article class="tarjeta">
+    <h3>Limitaciones del modelo</h3>
+    <ul>
+      <li>La red no aprende: sus pesos no cambian. Quien se adapta es la colonia, a través de las feromonas, no cada cerebro.</li>
+      <li>El mundo es plano y la feromona vive en una cuadrícula. En la realidad influyen mezclas de químicos, viento, temperatura y relieve.</li>
+      <li>Las hormigas reales también usan memoria visual, llevan la cuenta de sus pasos y se tocan entre sí. Aquí solo hay dos tipos de feromona.</li>
+      <li>Cerca del nido o de la comida, las hormigas huelen su objetivo directamente. Es un atajo mío que las reales no siempre tienen.</li>
+      <li>Todas son idénticas: no hay roles, depredadores, cansancio ni muerte.</li>
+      <li>Los parámetros (evaporación, depósito, alcance de los sensores) salieron de probar hasta que funcionara, no de mediciones biológicas.</li>
+    </ul>
+  </article>
+</section>
+
+<footer class="pie">Proyecto de Computación Bioinspirada — Laura Vanessa Bornacelli Parra</footer>
+
+<script src="js/cerebro.js"></script>
+<script src="js/simulacion.js"></script>
+<script src="js/interfaz.js"></script>
+</body>
+</html>

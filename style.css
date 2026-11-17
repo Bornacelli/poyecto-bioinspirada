@@ -1,0 +1,141 @@
+/* ==========================================================================
+   style.css — Diseño limpio y responsive. Colores sobrios.
+   Feromona de hogar = azul · feromona de comida = naranja (fáciles de distinguir)
+   ========================================================================== */
+:root {
+  --fondo: #f4f2ed;
+  --tarjeta: #ffffff;
+  --texto: #28251f;
+  --suave: #6b665c;
+  --borde: #e1ddd3;
+  --acento: #3d6b57;
+  --acento-osc: #2f5444;
+  --hogar: #2563eb;
+  --comida-fer: #ea580c;
+  --comida: #3f8f4f;
+  --muro: #55606e;
+  --nido: #7a4b2a;
+  --radio: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.55;
+}
+
+h1, h2, h3, h4 { line-height: 1.25; margin: 0 0 .6rem; }
+h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 1.02rem; }
+h4 { font-size: .8rem; color: var(--suave); text-transform: uppercase; letter-spacing: .04em; }
+p { margin: 0 0 .8rem; }
+code { background: #efece4; padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+
+.cabecera { max-width: 1240px; margin: 0 auto; padding: 1.6rem 16px .4rem; }
+.cabecera p { color: var(--suave); max-width: 70ch; margin: 0; }
+
+/* ---------- Disposición general ---------- */
+.app {
+  max-width: 1240px; margin: 0 auto; padding: 16px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start;
+}
+.principal { display: grid; gap: 16px; min-width: 0; }
+
+.tarjeta {
+  background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 16px; min-width: 0;
+}
+.panel { position: sticky; top: 12px; }
+
+/* ---------- Botones ---------- */
+.barra { display: grid; gap: 10px; }
+.grupo-botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  font: inherit; font-size: .92rem; cursor: pointer;
+  padding: .5rem .9rem; border-radius: 8px;
+  border: 1px solid var(--borde); background: #faf9f6; color: var(--texto);
+  transition: background .15s, border-color .15s;
+}
+.btn:hover:not(:disabled) { background: #efede6; border-color: #cfc9ba; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primario { background: var(--acento); border-color: var(--acento); color: #fff; }
+.btn.primario:hover:not(:disabled) { background: var(--acento-osc); border-color: var(--acento-osc); }
+.btn.esc.activo { background: #e4ede8; border-color: var(--acento); color: var(--acento-osc); font-weight: 600; }
+.btn:focus-visible, input:focus-visible { outline: 2px solid var(--hogar); outline-offset: 2px; }
+.desc { color: var(--suave); font-size: .9rem; margin: 0; }
+
+/* ---------- Lienzo ---------- */
+.lienzo-wrap { padding: 10px; }
+#lienzo {
+  display: block; width: 100%; height: auto; border-radius: 8px;
+  background: #faf8f3; touch-action: pan-y; cursor: crosshair;
+}
+#lienzo.dibujando { touch-action: none; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: .8rem; color: var(--suave); }
+.punto { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: -1px; margin-right: 4px; }
+.punto.nido { background: var(--nido); }
+.punto.comida { background: var(--comida); }
+.punto.muro { background: var(--muro); border-radius: 2px; }
+.punto.fer-hogar { background: var(--hogar); opacity: .7; }
+.punto.fer-comida { background: var(--comida-fer); opacity: .7; }
+.reloj { margin-top: 6px; font-size: .85rem; color: var(--suave); }
+
+#lienzoRed { width: 100%; max-width: 620px; height: auto; display: block; }
+
+/* ---------- Indicadores ---------- */
+.indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.ind { background: #f8f6f1; border: 1px solid var(--borde); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; }
+.ind .etq { font-size: .76rem; color: var(--suave); }
+.ind strong { font-size: 1.5rem; line-height: 1.3; font-variant-numeric: tabular-nums; }
+.ind small { color: var(--suave); font-size: .75rem; }
+
+#grafico { width: 100%; height: 250px; display: block; }
+.eventos { list-style: none; padding: 0; margin: 8px 0 12px; font-size: .84rem; color: var(--suave); }
+.eventos li { padding: 2px 0; }
+.eventos b { color: var(--comida-fer); }
+
+/* ---------- Panel de controles ---------- */
+.campo { display: block; margin-bottom: 14px; font-size: .9rem; }
+.campo input[type="range"] { width: 100%; accent-color: var(--acento); margin-top: 4px; }
+fieldset.modos { border: 1px solid var(--borde); border-radius: 10px; padding: 8px 12px; }
+fieldset.modos legend { padding: 0 6px; font-size: .85rem; color: var(--suave); }
+fieldset.modos label { display: block; padding: 3px 0; cursor: pointer; }
+.casilla { display: block; margin: 6px 0; font-size: .9rem; cursor: pointer; }
+.nota { font-size: .78rem; color: var(--suave); margin-top: 6px; }
+
+/* ---------- Explicación ---------- */
+.explicacion { max-width: 1240px; margin: 8px auto 0; padding: 0 16px 16px; display: grid; gap: 16px; }
+.explicacion > h2 { font-size: 1.5rem; margin-bottom: 0; }
+.columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.explicacion ul { margin: 0; padding-left: 1.2rem; }
+.explicacion li { margin-bottom: .4rem; }
+
+/* Diagrama entradas → red → decisión */
+.diagrama { display: flex; align-items: stretch; justify-content: space-between; gap: 8px; margin: 12px 0 16px; }
+.diagrama .col { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; justify-content: center; }
+.diagrama h4 { margin-bottom: 2px; }
+.nodo { padding: 7px 10px; border-radius: 8px; font-size: .82rem; text-align: center; border: 1px solid; }
+.nodo.ent { background: #eef3fb; border-color: #bdd0f3; }
+.nodo.oc { background: #f5efe6; border-color: #dccbb0; }
+.nodo.sal { background: #e9f2ec; border-color: #b6d3bf; }
+.nodo.dec { background: var(--acento); border-color: var(--acento); color: #fff; }
+.flecha { align-self: center; color: var(--suave); font-size: 1.4rem; }
+
+.pie { text-align: center; padding: 24px 16px 32px; color: var(--suave); font-size: .9rem; border-top: 1px solid var(--borde); margin-top: 8px; }
+
+/* ---------- Celular y pantallas pequeñas ---------- */
+@media (max-width: 960px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; order: -1; }
+  .columnas { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .diagrama { flex-direction: column; }
+  .flecha { transform: rotate(90deg); }
+  .ind strong { font-size: 1.3rem; }
+}
